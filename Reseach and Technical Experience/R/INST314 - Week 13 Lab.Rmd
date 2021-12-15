@@ -1,0 +1,167 @@
+---
+title: "INST 314 - Week 13 Lab - Spring 2021"
+name: "Kevin Tsai"
+date: "04-27-2021"
+output: html_notebook
+---
+
+A.  Chi-Square Analysis
+
+1.Using R, load the data, check the variables, and find those that you will need to create a contingency table for showing top choice of water versus their usual water source.  Label your rows and columns.    Include as many additional code chunks and explanation areas as needed
+
+```{r}
+#load data
+WaterTaste <- read.csv("C:/Users/kevin/Downloads/WaterTaste.csv")
+library(tidyverse)
+library(ggpubr)
+library(car)
+library(pwr)
+library(dplyr)
+library(ggplot2)
+
+
+#Count function was used to produce the numbers in contingency table
+count(WaterTaste,WaterTaste$UsuallyDrink == "Filtered" & WaterTaste$First == "Aqua")
+count(WaterTaste,WaterTaste$UsuallyDrink == "Filtered" &  WaterTaste$First == "Aquafina")
+count(WaterTaste,WaterTaste$UsuallyDrink == "Filtered" &  WaterTaste$First == "Sams")
+count(WaterTaste,WaterTaste$UsuallyDrink == "Filtered" &  WaterTaste$First == "SamsChoice")
+count(WaterTaste,WaterTaste$UsuallyDrink == "Filtered" &  WaterTaste$First == "Tap")
+count(WaterTaste,WaterTaste$UsuallyDrink == "Tap" &  WaterTaste$First == "Fiji")
+count(WaterTaste,WaterTaste$UsuallyDrink == "Tap" &  WaterTaste$First == "Aquafina")
+count(WaterTaste,WaterTaste$UsuallyDrink == "Tap" &  WaterTaste$First == "SamsChoice")
+count(WaterTaste,WaterTaste$UsuallyDrink == "Tap" &  WaterTaste$First == "Tap")
+count(WaterTaste,WaterTaste$UsuallyDrink == "Bottled" &  WaterTaste$First == "Fiji")
+count(WaterTaste,WaterTaste$UsuallyDrink == "Bottled" &  WaterTaste$First == "Aqua")
+count(WaterTaste,WaterTaste$UsuallyDrink == "Bottled" &  WaterTaste$First == "Aquafina")
+count(WaterTaste,WaterTaste$UsuallyDrink == "Bottled" &  WaterTaste$First == "SamsChoice")
+count(WaterTaste,WaterTaste$UsuallyDrink == "Bottled" &  WaterTaste$First == "Tap")
+
+#Number from count functions are formed into contingency table "WaterTasteTable"
+WaterTasteTable = matrix(c(10,4,9,3,16,7,7,3,15,14,8,4),byrow = TRUE, ncol = 4)
+#Column names are added
+colnames(WaterTasteTable)=c("Fiji","Aquafina","SamsChoice","Tap")
+#Row names are added
+rownames(WaterTasteTable)=c("Filtered", "Tap","Bottled")
+```
+
+2.  State valid null and alternative hypotheses for the chi-square test of independence.
+
+```{r}
+
+#H0: Top choices for taste preference are not associated with whether or not people drink bottled water
+#HA: Top choices for taste preference are associated with whether or not people drink bottled water
+
+```
+
+
+
+
+
+3.  Using R,  conduct a chi-square test of independence with this data.  
+```{r}
+chisq.test(WaterTasteTable)
+
+```
+
+5.  Based on your analysis, is there evidence that the top choices for taste preference are associated with whether or not people usually drink bottled water? If there is a significant association between these two variables, describe how they are related.
+```{r}
+#With a significance level of 0.05 and 6 degrees of freedom, the derived critical value is 12.592. My chi-squared test produced a chi-squared value of 4.9725 and a p-value of 0.5473. If I compare my chi-squared value to my critical value, we can see that it is significantly less (4.9725 < 12.592). We fail to reject the null hypothesis. Top choices for taste preference are not associated with whether or not people usually drink bottled water. 
+```
+
+B.  Analysis of Variance (ANOVA)
+
+Load the data, check the variables, and find those that you will need for this assignment. Optional:  Subset the dataset to only retain the variables that you need for this analysis. 
+
+```{r}
+#load data
+Cereal <- read.csv("C:/Users/kevin/Downloads/Cereal.csv")
+#subset data
+CerealFiber <- Cereal %>%
+  select(1,2,8)
+#convert char to numeric
+CerealFiber$Fiber <- sapply(CerealFiber$Fiber, as.numeric)
+
+```
+
+1. Summarize your data.
+a. Create a table of summary statistics, showing the sample size, mean, and standard deviation for each company.  
+
+```{r}
+#Creating summary table
+summary <- matrix(c(sum(CerealFiber$Company == "K"), mean(CerealFiber$Fiber[CerealFiber$Company == "K"]), sd(CerealFiber$Fiber[CerealFiber$Company == "K"]),  sum(CerealFiber$Company == "G"), mean(CerealFiber$Fiber[CerealFiber$Company == "G"]), sd(CerealFiber$Fiber[CerealFiber$Company == "Q"]), sum(CerealFiber$Company == "Q"), mean(CerealFiber$Fiber[CerealFiber$Company == "Q"]), sd(CerealFiber$Fiber[CerealFiber$Company == "Q"])), byrow = TRUE, ncol = 3)
+#Adding Column Names2
+colnames(summary) <-c("Sample Size","Mean","Standard Deviation")
+#Adding Company Row Names
+rownames(summary) <-c("Company K", "Company G", "Company Q")
+summary
+```
+
+b. Create a plot of side-by-side boxplots.  Comment on whether you are seeing any potential differences in the mean number of grams of fiber per serving, based on the three different companies.
+
+
+
+```{r}
+K <- c((CerealFiber$Fiber[CerealFiber$Company =="K"]))
+G <- c((CerealFiber$Fiber[CerealFiber$Company =="G"]))
+Q <- c((CerealFiber$Fiber[CerealFiber$Company =="Q"]))
+rownames(summary) <-c("Company K", "Company G", "Company Q")
+Company <- c("Company K","Company C", "Company Q")
+boxplot(K,G,Q,names=Company,horizontal = TRUE, main="Companies and their mean cereal of grams of fiber per serving", xlab = "Grams of Fiber per serving", ylab="Company Names")
+
+```
+#On examining the boxplots, the means between all companies are very similar as there is a lot of overlap between the plots making it hard to discern differences between the population means just by visible observation of the box plots.
+
+
+2. Check to see if the conditions for ANOVA are met. Interpret your results in the context of this problem, using complete sentence(s). State any limitations to using the traditional ANOVA test. 
+
+```{r}
+ggqqplot(CerealFiber$Fiber)
+ggqqplot(K)
+ggqqplot(G)
+ggqqplot(Q)
+
+#The conditions for ANOVA are met. The distributions are approximately normal as observed in the boxplots and the qqplots, the sample variance do not differ significantly, the samples are simple random samples, the sample are independent, and the sample are categorized by brand. Limitations to the traditional ANOVA test are when conditions are not met.
+
+
+```
+
+3.  State the hypotheses for this ANOVA using either words or symbols.
+```{r}
+#H0: muQ = muG = muK
+#HA: At least one mu is not equal to the other
+```
+
+
+4.   Perform the ANOVA and two way comparisons.  
+a.  Interpret the results of your ANOVA table in the context of this problem, using complete sentence(s).
+
+```{r}
+model <- aov(formula = Fiber ~ Company, data = CerealFiber)
+summary(model)
+TukeyHSD(model)
+
+#We fail to reject the null hypothesis and conclude that the means grams of fiber for the three companies are not significantly different. With degrees of freedom of 2 and 27 and a significance level of 0.05, our critical value from the f-table is 3.3541. Our F-value of 0.687 is less than the critical value. In addition, the p-value of 0.512 is greater than the significance level of 0.05 therefore the test results are not statistically significant.
+```
+
+
+b.  Interpret the results of your two-way comparisons in the context of this problem, using complete sentence(s).
+```{r}
+# As demonstrated from the Tukey Two factor test, we determined that the p-values between KG is 0.9244, QG is 0.4807, and QK is 0.6863. All the p-values are greater than our significance value of 0.05. Therefore, we will fail to reject our null hypothesis and shows that our test results are not statistically significant.
+```
+
+
+
+5. Perform an analysis of the power of this test.  Comment on the power of this test.   What could be done to improve the power?  What other limitations, if any, do you note in this test?
+```{r}
+eta_sq(model)
+pwr.anova.test(k=3, sig.level = 0.05, f=0.05, n=30, power = NULL)
+#The power of this test determined that the power is 0.0667. In comparison to a power level of 0.8 that signifies a powerful test, a power level of 0.0667 is considerably low to be significant. A low power level also suggests that there is a greater chance of committing a type 2 error. We also notice that the effect size is 0.05 which also small in magnitude. Given these observations, in order to improve the power a larger sample size would be needed, which would give  more variance and increase effect size, and significance level (alpha) could also be increased. The greatest limiting factor in this test would be the sample size. There are too few data points. 
+```
+
+6.  Refer to your answers in #2 and 5.  Comment on whether or not a non-parametric test would be a better option for this data.  Why or why not?  
+```{r}
+#A non-parametric test would be a better option than a parametric test. Parametric test have a lot of statistical power in identifying a significant effect. However, the sample size (n=30) is simply not large enough to produce a significant result in a parametric test. As shown in the power test, the power level is less than 0.1. Usually, test that identify a significant effect have power levels of 0.8 or greater. Although the distributions of the sample are normal as observed in the box plots and qqplot, we were not able to produce test results that were statistically significant in the ANOVA test. 
+```
+
+
+
