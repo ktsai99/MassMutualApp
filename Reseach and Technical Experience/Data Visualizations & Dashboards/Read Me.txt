@@ -1,3 +1,0 @@
-DataDog API Dashboard: Metrics created using API from TCR portal
-DataDog EC2 Instance Metrics Dashboard: Metrics from AWS api
-Klipfolio Dashboard Snapshot: Metrics queried from MySQL Database
